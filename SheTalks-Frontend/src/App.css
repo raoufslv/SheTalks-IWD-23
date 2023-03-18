@@ -1,0 +1,89 @@
+.Tache {
+  position: absolute;
+  width: 411.7px;
+  height: 891.78px;
+  right: -280px;
+  top: -720px;
+
+  border-radius: 0 110px 0 0;
+
+  background: #d7263e79;
+  transform: rotate(-170deg);
+}
+
+.w-120 {
+  width: 34rem;
+}
+
+.lino {
+  line-height: 20.5;
+}
+
+.primary-color {
+  color: #2fa4ff;
+}
+
+.primary-color:hover {
+  color: #2fa4ff;
+}
+
+.primary-color:active {
+  color: #2fa4ff;
+}
+
+.primary-color:focus {
+  color: #2fa4ff;
+}
+
+.bg-primary {
+  background-color: #2fa4ff;
+}
+
+.bg-linear-hero {
+  background: linear-gradient(
+    180deg,
+    rgba(215, 38, 61, 0) 0%,
+    rgba(215, 38, 61, 0.15) 48.99%,
+    rgba(215, 38, 61, 0) 100%
+  );
+}
+
+.secondary-color {
+  color: #d7263d;
+}
+
+.bg-secondary {
+  background-color: #d7263d;
+}
+
+.border-secondary {
+  border-color: #d7263d;
+}
+
+.border-primary {
+    border-color: #2fa4ff;
+  }
+
+.linear2{
+    background-image: url(../public/womenDoctor.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: 40rem;
+
+}
+
+.top-74{
+    top: 19rem;
+}
+
+.thrid-color{
+    color: #FF8393;
+}
+.bg-thrid{
+    background-color: #FF8393;
+}
+
+.bg-fourth{
+    background-color: #D9D9D9;
+}
