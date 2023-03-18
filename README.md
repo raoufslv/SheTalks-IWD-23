@@ -55,3 +55,6 @@ https://www.figma.com/proto/JzlK0BXAL42IRQZdxiyriO/iwd?node-id=5-76&scaling=scal
 - **Mobile App** Only prototype for now  LINK :
 https://www.figma.com/file/fur3fs5y9gDHNYiqrqR3P1/SheTalks?node-id=0-1
 
+In the coding part we haved managed to connect the front to the backend 
+With axios 
+We didn't have to make the web responsive, because we have a mobile application for the platform to ensure the efficency of notification.
