@@ -53,7 +53,8 @@
 }
 
 .bg-secondary {
-  background-color: #d7263d;
+  --tw-bg-opacity: 1;
+  background-color: #d7263d !important;
 }
 
 .border-secondary {
@@ -65,7 +66,7 @@
   }
 
 .linear2{
-    background-image: url(../public/womenDoctor.png);
+    background-image: url(womenDoctor.png);
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -79,6 +80,9 @@
 
 .thrid-color{
     color: #FF8393;
+}
+.border-thrid{
+    border-color: #FF8393;
 }
 .bg-thrid{
     background-color: #FF8393;

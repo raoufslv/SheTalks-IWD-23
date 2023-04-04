@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const user = require("./userModel");
 
 const postSchema = mongoose.Schema(
     {
@@ -6,24 +7,34 @@ const postSchema = mongoose.Schema(
             type: String,
             required: [true, "Please add the post title"],
         },
-        description: {
+        story: {
             type: String,
-            required: [true, "Please add the post description"],
+            required: [true, "Please add the post story"],
         },
-        user: {
-            type: mongoose.Schema.ObjectId,
+        user_id: {
+            // make it like a foreign key to the user table in the database (the user_id is the primary key in the user table)
+            type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
         },
-        Anonyme: {
+        tags:
+        {
+            type: [String],
+            default: [],
+        },
+        feeling: {
+            type: String,
+            default: "Neutral",
+        },
+
+        anonymous: {
             type: Boolean,
-            required: [true, "Please add the post Anonyme"],
+            default: false,
         },
         typeofPost: {
             enum: ["Article", "Post"],
-            default: "Post",
             type: String,
-            required: [true, "Please add the post typeofPost"],
+            default: "Post",
         },
     },
     {

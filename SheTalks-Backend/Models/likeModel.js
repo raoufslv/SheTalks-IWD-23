@@ -8,7 +8,7 @@ const likeSchema = mongoose.Schema(
             required: true,
         },
         post: {
-            type: mongoose.Schema.ObjectId,
+            type:  mongoose.Schema.ObjectId,
             ref: 'Post',
             required: true,
         },

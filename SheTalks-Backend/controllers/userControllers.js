@@ -1,52 +1,74 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const Event = require("../models/eventModel");
-const Post = require("../models/postModel");
-const comment = require("../models/commentaireModel");
-const like = require("../models/likeModel");
-
+const sessions = require("../models/sessions");
+const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-
 // ****************************** USER registrations ******************************
 
 //@desc Register a user
 //@route POST /api/users/register
 //@access public
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, password, phone } = req.body;
-  if (!username || !email || !password) {
-    return res.status(400);
+  const { FirstName, LastName, phone, age, username, email, password } =
+    req.body;
+  if (
+    !FirstName ||
+    !LastName ||
+    !phone ||
+    !age ||
+    !username ||
+    !email ||
+    !password
+  ) {
+    return res.status(400).json({ message: "one of the fields is empty" });
   }
-  const userAvailable = await User.findOne({ email });
+  const emailAvailable = await User.findOne({ email }); // findOne returns the first document that matches the specified query criteria on the collection or view.
+  if (emailAvailable) {
+    return res.status(400).json({ data: "email is taken" });
+  }
+  const userAvailable = await User.findOne({ username });
   if (userAvailable) {
-    return res.status(400);
+    return res.status(400).json({ data: "username is taken" });
   }
 
   //Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
-  console.log("Hashed Password: ", hashedPassword);
+  const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds (the higher the number the more secure the password)
   const user = await User.create({
-    ...req.body,
+    firstName: FirstName,
+    lastName: LastName,
+    phone,
+    age,
+    username,
+    email,
+    password: hashedPassword,
   });
 
-  console.log(`User created ${user}`);
   if (user) {
-    const token = jwt.sign(
-      { user: { id: user._id } },
-      process.env.ACCESS_TOKEN_SECERT,
-      { expiresIn: "60d" }
-    );
+    // const csrfToken = uuidv4(); // Generate a unique CSRF token
+    const sessionId = uuidv4(); // Generate a unique session ID
+
+    res.cookie("session", sessionId, {
+      httpOnly: true, // The cookie only accessible by the web server (not by the client)
+      //   // secure: true, // The cookie only accessible through HTTPS (not HTTP)
+      //   // sameSite: "strict",
+    });
+
+    // store the session in the database
+    const session = await sessions.create({
+      session: sessionId,
+      userId: user._id,
+    });
+
     return res.status(201).json({
-      _id: user.id,
-      email: user.email,
-      username: user.username,
-      phone: user.phone,
-      userType: user.userType,
-      token: token,
+      data: "user created",
+      user: {
+        id: user._id,
+        userType: user.userType,
+      },
     });
   } else {
-    return res.status(400);
+    return res.status(400).json({ data: "invalid user data" });
   }
 });
 
@@ -56,22 +78,64 @@ const registerUser = asyncHandler(async (req, res) => {
 //@route POST /api/users/login
 //@access public
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
+  const { username, password } = req.body;
+  if (!username || !password) {
     return res.status(400);
   }
-  const user = await User.findOne({ email });
+
+  const user = await User.findOne({ username });
+
+  if (!user) {
+    return res.status(401).json({ message: "no account" });
+  }
+
   //compare password with hashedpassword
-  if (user && (await bcrypt.compare(password, user.password))) {
-    console.log("User found");
-    const token = jwt.sign(
-      { user: { id: user._id } },
-      process.env.ACCESS_TOKEN_SECERT,
-      { expiresIn: "60d" }
-    );
-    return res.json({ user: user.username, email: user.email, token });
+  if (await bcrypt.compare(password, user.password)) {
+    // search the session in the database
+    const user_id = user._id;
+    const sess = sessions.findOne({ userId: user_id });
+
+    sess.then((session) => {
+      if (session) {
+        res.cookie("session", session.session, {
+          httpOnly: true, // The cookie only accessible by the web server (not by the client)
+          //   // secure: true, // The cookie only accessible through HTTPS (not HTTP)
+          //   // sameSite: "strict",
+        });
+        return res.status(201).json({
+          message: "user logged in",
+          user_id: user.user_id,
+          userType: user.userType,
+        });
+      } else {
+        const sessionId = uuidv4(); // Generate a unique session ID
+        res.cookie("session", sessionId, {
+          httpOnly: true, // The cookie only accessible by the web server (not by the client)
+          //   // secure: true, // The cookie only accessible through HTTPS (not HTTP)
+          //   // sameSite: "strict",
+        });
+
+        // store the session in the database
+        const session = sessions.create({
+          session: sessionId,
+          userId: user._id,
+        });
+        return res.status(201).json({
+          message: "user logged in",
+          user_id: user.user_id,
+          userType: user.userType,
+          email: user.email,
+          phone: user.phone,
+          age: user.age,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        });
+      }
+    });
   } else {
-    return res.status(401);
+    return res.status(401).json({
+      message: "password incorrect",
+    });
   }
 });
 
@@ -139,112 +203,54 @@ const getEvents = asyncHandler(async (req, res) => {
   res.json(events);
 });
 
-// ****************************** USER posts ******************************
-//@desc Get all posts
-//@route GET /api/users/posts
-//@access public
-const getPosts = asyncHandler(async (req, res) => {
-  const posts = await Post.find({});
-  res.json(posts);
-});
 
-// ****************************** USER post post ******************************
-//@desc Post a post
-//@route POST /api/users/poster
+
+// ****************************** USER get user info ******************************
+//@desc Get user info
+//@route GET /api/users/userinfo
 //@access public
-const postPost = asyncHandler(async (req, res) => {
-  const { title, description, Anonyme, typeofPost } = req.body;
-  if (!title || !description) {
-    res.status(400);
-    throw new Error("All fields are mandatory!");
-  }
-  const post = await Post.create({
-    title,
-    description,
-    user: "64140f5eba0987cccc8ef1f2",
-    Anonyme,
-    typeofPost,
+const getUserInfo = asyncHandler(async (req, res) => {
+  getUserID(req.cookies.session).then(async (user_id) => {
+    const user = await User.findById(user_id);
+    if (user) {
+      res.status(201).json({
+        message: "found",
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+    } else {
+      res.status(201).json({ message: "not found" });
+    }
   });
-
-  if (post) {
-    res.status(201).json(post);
-  } else {
-    res.status(400).json({ message: "Post data was not valid" });
-  }
 });
 
-// ****************************** USER post comment ******************************
-//@desc Post a comment
-//@route POST /api/users/commenter
+// ****************************** USER get user ID from session ******************************
+//@desc Get user ID from session
+//@route GET /api/users/userid
 //@access public
-const postComment = asyncHandler(async (req, res) => {
-  const { text, Anonyme } = req.body;
-  try {
-  } catch (error) {}
-  if (!text) {
-    res.status(400);
-    throw new Error("All fields are mandatory!");
-  }
-  const comment = await comment.create({
-    text,
-    user: req.user._id,
-    post: req.post._id,
-    Anonyme,
-  });
-
-  if (comment) {
-    res.status(201).json({ _id: comment.id, text: comment.text });
-  } else {
-    res.status(400);
-    throw new Error("Comment data was not valid");
-  }
+const getUserID = asyncHandler(async (session_id) => {
+  const session = await sessions.findOne({ session: session_id });
+  return session.userId;
 });
 
-// ****************************** USER like ******************************
-//@desc Like a post
-//@route POST /api/users/like
+// ****************************** USER get a user ******************************
+//@desc Get a user
+//@route GET /api/users/auser
 //@access public
-const likePost = asyncHandler(async (req, res) => {
-  const { post } = req.body;
-  if (!post) {
-    res.status(400);
-    throw new Error("All fields are mandatory!");
-  }
-  const like = await like.create({
-    user: req.user._id,
-    post: req.post._id,
-  });
-
-  if (like) {
-    res.status(201).json({ _id: like.id, text: like.text });
-  } else {
-    res.status(400);
-    throw new Error("Like data was not valid");
-  }
-  res.json({ message: "Post the like" });
-});
-
-// ****************************** USER get post ******************************
-//@desc Get a post
-//@route GET /api/users/post
-//@access public
-const getPost = asyncHandler(async (req, res) => {
-  const post = await Post.findById(req.post._id);
-  if (post) {
-    console.log("Post found");
-    res.json({
-      id: post._id,
-      title: post.title,
-      description: post.description,
-      user: post.user,
-      Anonyme: post.Anonyme,
-      typeofPost: post.typeofPost,
+const getAuser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (user) {
+    res.status(201).json({
+      message: "found",
+      firstName: user.firstName,
+      lastName: user.lastName,
     });
   } else {
-    res.status(404);
-    throw new Error("Post not found");
+    res.status(201).json({ message: "not found" });
   }
 });
+
+
 
 module.exports = {
   registerUser,
@@ -253,9 +259,6 @@ module.exports = {
   getUserProfile,
   updateUserProfile,
   getEvents,
-  getPosts,
-  postPost,
-  postComment,
-  likePost,
-  getPost,
+  getUserInfo,
+  getAuser,
 };
