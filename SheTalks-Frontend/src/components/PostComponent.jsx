@@ -1,7 +1,16 @@
 import React from "react";
 import axios from "axios";
 
-const Post = ({ post_id, title, user_id, description, createdAt }) => {
+const Post = ({
+  post_id,
+  title,
+  user_id,
+  description,
+  createdAt,
+  tags,
+  feelings,
+  anonymous,
+}) => {
   const [firstName, setFirstName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
   const [liked, setLiked] = React.useState(false);
@@ -99,13 +108,17 @@ const Post = ({ post_id, title, user_id, description, createdAt }) => {
     <div className="flex flex-col gap-3 mb-5 w-[60rem]">
       <div className="bg-fourth py-3 rounded px-3 flex items-center gap-3 justify-between">
         <div className=" flex gap-2">
-          <img src="/womenPost.png" className="w-14" alt="" />
+          {anonymous ? (
+            <img src="/anonym.svg" className="w-14" alt="" />
+          ) : (
+            <img src="/womenPost.png" className="w-14" alt="" />
+          )}
           <div className="">
             <h2 className=" text-lg font-medium ">
-              {firstName} {lastName}
+              {anonymous ? "Anonymous" : firstName + " " + lastName}
             </h2>
             <p className=" text-xs">
-              is feeling <span className="font-bold">Depressed</span>
+              is feeling <span className="font-bold">{feelings}</span>
             </p>
           </div>
         </div>
@@ -118,32 +131,46 @@ const Post = ({ post_id, title, user_id, description, createdAt }) => {
       </div>
       <h4 className="text-xl font-bold">{title}</h4>
       <p>{description}</p>
-      <div className="bg-fourth py-3 rounded px-2 flex items-center gap-3">
-        <div className=" flex justify-center items-center">
-          {liked ? (
-            <img
-              src="/heart.svg"
-              className="cursor-pointer"
-              onClick={unlikePost}
-              alt=""
-            />
-          ) : (
-            <img
-              src="/heartEmpty.svg"
-              className="cursor-pointer"
-              onClick={likePost}
-              alt=""
-            />
-          )}
-          {likes}
+
+      <div className="bg-fourth py-3 rounded px-2 flex items-center gap-10">
+        <div className="flex items-center gap-3">
+          <div className=" flex justify-center items-center">
+            {liked ? (
+              <img
+                src="/heart.svg"
+                className="cursor-pointer"
+                onClick={unlikePost}
+                alt=""
+              />
+            ) : (
+              <img
+                src="/heartEmpty.svg"
+                className="cursor-pointer"
+                onClick={likePost}
+                alt=""
+              />
+            )}
+            {likes}
+          </div>
+          <div className=" flex justify-center items-center">
+            <img src="/directup.svg" alt="" />
+            23
+          </div>
+          <div className=" flex justify-center items-center">
+            <img src="/messagetext1.svg" alt="" />
+            12
+          </div>
         </div>
-        <div className=" flex justify-center items-center">
-          <img src="/directup.svg" alt="" />
-          23
-        </div>
-        <div className=" flex justify-center items-center">
-          <img src="/messagetext1.svg" alt="" />
-          12
+        <div>
+          <div className=" flex gap-2">
+            {tags.map((tag) => (
+              <button
+                key={tag}
+              className="bg-thrid text-white py-1 px-3 rounded-lg">
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -3,8 +3,15 @@ import Navbar from "../components/Navbar";
 import Card from "../components/Card";
 import Footer from "../components/Footer";
 import "@fontsource/poppins"; // Defaults to weight 400.
+import "react-responsive-modal/styles.css";
+import { Modal } from "react-responsive-modal";
 
 const Home = () => {
+  const [open, setOpen] = React.useState(false);
+
+  const onOpenModal = () => setOpen(true);
+  const onCloseModal = () => setOpen(false);
+
   const scrollToSection = (id) => {
     const element = document.querySelector(id);
     const offsetTop = element.offsetTop;
@@ -74,7 +81,7 @@ const Home = () => {
         <h2 className=" text-3xl font-extrabold text-center flex justify-center items-end">
           <div className="mb-1 flex justify-center items-center flex-col">
             <span className="pb-2">Discover the Features</span>
-            
+
             <img src="Rectangle.svg" className=" w-48" alt="" />
           </div>
           <div className=" relative -mr-[11.95rem] -mt-4 ">
@@ -131,8 +138,9 @@ const Home = () => {
             Connecting with a Counselor from Anywhere: The Advantages of Online
             Therapy
           </h4>
-          <button className="text-white bg-secondary rounded-2xl px-4 py-2 font-bold"
-          onClick={() => window.open("/SignUp")}
+          <button
+            className="text-white bg-secondary rounded-2xl px-4 py-2 font-bold"
+            onClick={() => window.open("/SignUp")}
           >
             Get Started
           </button>
@@ -144,7 +152,9 @@ const Home = () => {
           alt=""
         />
         <div id="Testmonials" className=" mt-56">
-          <h2 className="text-3xl font-extrabold text-center pb-1">Testmonials</h2>
+          <h2 className="text-3xl font-extrabold text-center pb-1">
+            Testmonials
+          </h2>
           <img
             src="/L6.svg"
             className=" w-[27.5rem] absolute right-56"

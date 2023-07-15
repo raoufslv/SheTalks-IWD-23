@@ -19,7 +19,8 @@ const getUserID = asyncHandler(async (session_id) => {
 //@route GET /api/users/posts
 //@access public
 const getPosts = asyncHandler(async (req, res) => {
-  const posts = await Post.find({});
+  // find all posts and sort them by date
+  const posts = await Post.find({}).sort({ createdAt: -1 });
 
   if (posts) {
     res.json({ message: "found", posts: posts });
@@ -45,7 +46,7 @@ const postPost = asyncHandler(async (req, res) => {
   console.log("user_id", user_id);
   const post = await Post.create({
     title,
-    story,
+    description: story,
     feeling,
     tags,
     anonymous,
@@ -53,7 +54,7 @@ const postPost = asyncHandler(async (req, res) => {
   });
 
   if (post) {
-    res.status(201).json(post);
+    res.status(201).json({ message: "Post data was not valid", post: post });
   } else {
     res.status(400).json({ message: "Post data was not valid" });
   }

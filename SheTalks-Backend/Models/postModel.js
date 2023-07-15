@@ -7,7 +7,7 @@ const postSchema = mongoose.Schema(
             type: String,
             required: [true, "Please add the post title"],
         },
-        story: {
+        description: {
             type: String,
             required: [true, "Please add the post story"],
         },

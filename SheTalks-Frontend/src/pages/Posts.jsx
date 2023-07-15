@@ -1,20 +1,45 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import NewNavbar from "../components/NewNavbar";
 import Footer from "../components/Footer";
-import Post from "../components/Post";
+import Post from "../components/PostComponent";
 import Model from "../components/Model";
 
 const Posts = () => {
+  const [posts, setPosts] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const handleSubmitSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await getPostsAxios();
+      if (response.data.message === "found") {
+        setPosts(
+          response.data.posts.filter((post) => post.title.includes(search))
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getPostsAxios = () => {
+    return axios.get("http://localhost:5001/Posts", {
+      withCredentials: true,
+    });
+  };
+
   const getAllPosts = async () => {
     try {
-      const response = await axios.get("http://localhost:5001/Posts", {
-        withCredentials: true,
-      });
+      const response = await getPostsAxios();
 
       if (response.data.message == "found") {
         return response.data.posts;
       } else if (response.data.message == "not found") {
+        console.log("not found");
+        return [];
+      } else {
+        console.log("error");
         return [];
       }
     } catch (error) {
@@ -23,9 +48,11 @@ const Posts = () => {
     }
   };
 
-  const [posts, setPosts] = React.useState([]);
+  const hundleChangeSearch = (e) => {
+    setSearch(e.target.value);
+  };
 
-  React.useEffect(() => {
+  useEffect(() => {
     getAllPosts().then((posts) => {
       setPosts(posts);
     });
@@ -42,25 +69,31 @@ const Posts = () => {
 
       <div className="mx-20">
         <div className=" mt-10 flex flex-row-reverse gap-10">
-          <div className="  w-[30rem] bg-fourth rounded-xl p-5 flex flex-col justify-around gap-10 mb-10">
+          <div className="  w-[30rem] sticky top-5   h-[95vh] bg-fourth rounded-xl p-5 flex flex-col justify-around gap-10 mb-10">
             <div>
-              <h2 className=" text-center font-semibold text-xl">
+              <h2 className="text-center font-semibold text-xl">
                 {" "}
                 Search for a story
               </h2>
               <div className="relative flex justify-center">
-                <input
-                  type="text"
-                  className="rounded-lg my-2 px-2 py-3 w-full"
-                  placeholder="Period issues"
-                />
-                <button>
-                  <img
-                    src="/receiptsearch.svg"
-                    className="absolute right-5 bottom-5"
-                    alt=""
+                <form className="w-full" onSubmit={handleSubmitSearch}>
+                  <input
+                    id="search"
+                    name="search"
+                    type="text"
+                    className="rounded-lg my-2 px-2 py-3 w-full"
+                    placeholder="Period issues"
+                    onChange={hundleChangeSearch}
+                    value={search}
                   />
-                </button>
+                  <button>
+                    <img
+                      src="/receiptsearch.svg"
+                      className="absolute right-5 bottom-5"
+                      alt=""
+                    />
+                  </button>
+                </form>
               </div>
             </div>
 
@@ -129,16 +162,20 @@ const Posts = () => {
 
           <div className="">
             <div className="flex flex-col gap-10">
-              {posts.map((post) => (
-                <Post
-                  key={post._id}
-                  post_id={post._id}
-                  title={post.title}
-                  description={post.description}
-                  createdAt={post.createdAt}
-                  user_id={post.user_id}
-                />
-              ))}
+              {posts &&
+                posts.map((post) => (
+                  <Post
+                    key={post._id}
+                    post_id={post._id}
+                    title={post.title}
+                    description={post.description}
+                    createdAt={post.createdAt}
+                    user_id={post.user_id}
+                    tags={post.tags}
+                    feelings={post.feeling}
+                    anonymous={post.anonymous}
+                  />
+                ))}
             </div>
           </div>
         </div>

@@ -91,3 +91,9 @@
 .bg-fourth{
     background-color: #D9D9D9;
 }
+
+.sideNav{
+  position: sticky;
+  top: 0;
+
+}

@@ -116,6 +116,7 @@ const Model = () => {
     }
 
     try {
+      console.log(isChecked);
       const response = axios.post(
         "http://localhost:5001/Poster",
         {
@@ -130,7 +131,7 @@ const Model = () => {
         }
       );
       console.log(response);
-      // closeModal()
+      closeModal()
       window.location.href = "/Posts";
     } catch (error) {
       console.log(error);
@@ -199,9 +200,9 @@ const Model = () => {
             </h1>
             <div className=" flex flex-wrap items-center">
               {tags.map((tag) => (
-                <button
+                <div
                   key={tag}
-                  className={`mt-2 mr-3 px-2 border-2 border-thrid rounded font-medium text-sm ${
+                  className={`cursor-pointer mt-2 mr-3 px-2 border-2 border-thrid rounded font-medium text-sm ${
                     isTagSelected(tag)
                       ? " thrid-color  px-1 py-1"
                       : " text-white bg-thrid py-2"
@@ -213,7 +214,7 @@ const Model = () => {
                   }
                 >
                   {tag}
-                </button>
+                </div>
               ))}
               <img
                 id="plus"
@@ -271,7 +272,7 @@ const Model = () => {
             <div className="flex items-center">
               <input
                 type="checkbox"
-                className="w-4 h-4"
+                className="w-4 h-4 cursor-pointer"
                 checked={isChecked}
                 onChange={handleOnChangeCheckBox}
                 id="checkbox"
